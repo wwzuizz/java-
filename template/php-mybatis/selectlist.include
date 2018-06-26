@@ -1,0 +1,16 @@
+<#assign checkList= "SelectTag"?new()/>
+<#assign tempList=checkList()/>
+<#if tempList?string != "">
+
+<#list tempList?split("-") as x>
+<#assign itemList =x?eval>   
+<label for="${itemList['key']}" class="control-label ">${itemList['name']}：</label> 
+      <select id="${itemList['key']}List"  name="${itemList['key']}" data-toggle="selectpicker" data-rule=“required” >
+         <option value="-1">全部</option>
+               ${r"<#list"}  ${itemList['key']}Map?keys as i>
+                			<option value="${r"$"}{i}"  ${r"<#if"}
+								vo.${itemList['key']}??&&vo.${itemList['key']}==i?number> selected${r"</#if>"}>${r"$"}{${itemList['key']}Map[i]}</option>
+					  ${r"</#list>"} 
+ </select>
+</#list>
+</#if>

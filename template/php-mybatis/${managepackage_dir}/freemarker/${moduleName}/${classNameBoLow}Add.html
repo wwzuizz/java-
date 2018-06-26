@@ -1,0 +1,58 @@
+[#ftl] [#include '/share.include'] 
+[#assign check= "ControllerMapTag"?new()/]
+[#assign temp=check()/]
+[#assign ListMap= "ListMapTag"?new()/]
+[#assign mapStr=ListMap()/]
+[#assign JsonMaps =mapStr?eval]
+<div class="bjui-pageContent">
+    <form action="[@el2 "base"/]/admin/${classNameLow}Add" id="form1" data-toggle="validate" data-alertmsg="false">
+        <table class="table table-condensed table-hover" width="100%">
+            <tbody> [#list table.notPkColumns as column] 
+            [#if column.columnNameFirstLower != 'isDel' 
+            && column.columnNameFirstLower != 'createTime'
+            &&column.columnNameFirstLower != 'updateTime' 
+            && column.columnNameFirstLower != 'createId'
+            && column.columnNameFirstLower != 'updateId'
+            && column.columnNameFirstLower !='status']
+               
+                 [#if  temp?contains(column.columnNameFirstLower)]
+                 
+                 
+				[#elseif mapStr?contains(column.columnNameFirstLower)]
+							 <tr>
+                    <td><label for="${column.columnNameFirstLower}" class="control-label x85">${column.remarksFirst!}：</label> 
+				<select id="${column.columnNameFirstLower}List" data-rule=“required” name="${column.columnNameFirstLower}" data-toggle="selectpicker">
+      		   <option value="-1">请选择</option>
+               ${r"<#list"}  ${JsonMaps[column.columnNameFirstLower]}Map?keys as i>
+                			<option value="${r"$"}{i}" >${r"$"}{${JsonMaps[column.columnNameFirstLower]}Map[i]}</option>
+					  ${r"</#list>"} 
+ 			</select>
+ 			    </td>
+                    <td>
+                </tr>
+				[#else]
+				 <tr>
+                    <td><label for="${column.columnNameFirstLower}" class="control-label x85">${column.remarksFirst!}：</label> 
+                    
+			      <input type="text" name="${column.columnNameFirstLower}" id="${column.columnNameFirstLower}"
+                     value="" data-rule="[#if !column.nullable]required [/#if][#if column.isNumberColumn]number [/#if]">
+                        </td>
+                    <td>
+                </tr>
+				[/#if]
+                
+                     
+                  
+                   [/#if] [/#list]
+                      [#include '/addlist.include']
+       
+            </tbody>
+        </table>
+    </form>
+</div>
+<div class="bjui-pageFooter">
+    <ul>
+        <li><button type="button" class="btn-close" data-icon="close">取消</button></li>
+        <li><button type="submit" class="btn-default" data-icon="save">保存</button></li>
+    </ul>
+</div>

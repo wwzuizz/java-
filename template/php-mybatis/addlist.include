@@ -1,0 +1,19 @@
+
+<#assign checkadd= "SelectTag"?new()/>
+<#assign tempadd=checkadd()/>
+<#if tempadd?string != "">
+<#list tempadd?split("-") as x>
+<#assign itemadd =x?eval>   
+
+                     <tr>
+                 <td><label for="${itemadd['key']}" class="control-label x85">${itemadd['name']}：</label> 
+      <select  id="${itemadd['key']}Add" name="${itemadd['key']}" data-toggle="selectpicker" data-rule=“required” >
+               ${r"<#list"}  ${itemadd['key']}Map?keys as i>
+                			<option value="${r"$"}{i}" >  ${r"$"}{${itemadd['key']}Map[i]}</option>
+					  ${r"</#list>"} 
+            </select>
+        </td>
+                    <td>
+                </tr>
+</#list>
+</#if>

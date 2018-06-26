@@ -1,0 +1,20 @@
+<#assign checkEdit= "SelectTag"?new()/>
+<#assign tempEdit=checkEdit()/>
+<#if tempEdit?string != "">
+
+<#list tempEdit?split("-") as x>
+<#assign itemEdit =x?eval>   
+ <tr>
+                 <td>
+ <label for="${itemEdit['key']}" class="control-label x85">${itemEdit['name']}：</label> 
+      <select id="${itemEdit['key']}Edit" name="${itemEdit['key']}" data-toggle="selectpicker" data-rule=“required” >
+               ${r"<#list"}  ${itemEdit['key']}Map?keys as i>
+                			<option value="${r"$"}{i}"  ${r"<#if"}
+								vo.${itemEdit['key']}??&&vo.${itemEdit['key']}==i?number> selected${r"</#if>"}>${r"$"}{${itemEdit['key']}Map[i]}</option>
+					  ${r"</#list>"} 
+ </select>
+ </td>
+                    <td>
+                </tr>
+</#list>
+</#if>

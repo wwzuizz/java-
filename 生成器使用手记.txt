@@ -1,0 +1,44 @@
+
+一, generator.xml 中 修改author   //作者
+
+二, GeneratorMain 中 修改demo_article  //表名
+
+三, 生成的ConditionVo 中 补充需要的查询字段, 不要使用基本数据类型
+
+四, 生成的Mapping.xml 中 补充需要的查询字段,null判断
+
+五, 生成的Controller 中 addSharedAttr 补充公共数据
+
+六, 检查生成的Controller 中 writeDwzSignal 的demoDemoArticleLiNav 是否跟资源的相符,否则增改删后不会刷新页面
+
+七, list.jsp 中,补充需要的查询字段
+
+八, 调整页面具体显示,即可使用
+
+九, 页面中的checkbox选中时会提交为on,后端非boolean时,可以在vo中建个boolean字段处理
+		不选中时会无此参数,在controller里再次处理
+
+
+
+DemoArticle,DemoArticleVo,DemoArticleConditionVo 中,不用原生类型,这样页面传来值为null时,可以避免赋默认值
+
+数据库的特殊布尔值要有默认初始化,如    private Integer isDel = -1; // 已删除,1,-1
+
+数据库主键一般为int(10),不论什么名字,生成的都有个id字段指向主键,都有个deleted包装了isDel
+所以页面上可以用id和deleted
+
+service中尽量调用updateSelective 动态更新
+
+数据库中
+   `create_time` timestamp NULL DEFAULT '0000-00-00 00:00:00',
+  `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+所以新增时必须指定create_time,而更新时则保留上次的create_time(页面中hidden)
+生成器已在Mapping.xml中自动处理
+
+数据库字段的备注,可以用,( 分隔,前面的会作为页面表格的标题
+如  状态,1,x,2,y      状态(1,x,2,y)
+
+
+所以,表中必须有主键(int),isDel(int),create_time,update_time
+
+

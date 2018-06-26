@@ -1,0 +1,23 @@
+<#-- 本文件包含一些公共的函数,本文件会被其它模板自动include -->
+
+<#-- 将value变成${value} -->
+<#macro el1 value>${r"#{"}${value}}</#macro>
+<#macro el2 value>${r"${"}${value}}</#macro>
+
+<#-- 生成java构造函数 -->
+<#macro generateConstructor constructor>
+	public ${constructor}(){
+	}
+
+	public ${constructor}(<#list table.compositeIdColumns as column>${column.possibleShortJavaType  } ${column.columnNameFirstLower }<#sep>,</#list>){
+	<#list table.compositeIdColumns as column>
+		<#if column.pk>
+		this.${column.columnNameFirstLower} = ${column.columnNameFirstLower};
+		</#if>
+	</#list>	
+	}
+
+</#macro>
+
+
+

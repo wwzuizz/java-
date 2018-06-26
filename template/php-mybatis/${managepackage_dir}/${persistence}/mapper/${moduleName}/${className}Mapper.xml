@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<#include '/share.include'>
+<#if idColumn??>
+<#assign idJavaType = idColumn.javaType>
+</#if>
+<#assign
+model="${managepackage}.model.${moduleName}.bean.${className}">
+
+<!-- author: ${author}, date: ${.now?datetime}, ${table.remarks!} -->
+
+<mapper
+	namespace="${managepackage}.${persistence}.dao.${moduleName}.${className}Dao">
+	<resultMap id="rm" type="${model}">
+		<#list columns as column>
+		<result property="${column.columnNameFirstLower}" jdbcType="${column.jdbcType}"
+			column="${column.sqlName}" />
+		</#list>
+	</resultMap>
+	<sql id="Base_Column_List">
+		<#list columns as column>
+		${column.sqlName}<#sep>,
+		</#list>
+	</sql>
+
+<#if pkColumns??>
+	<select id="findById" parameterType="${idJavaType!}" resultMap="rm">
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM ${sqlName}
+		WHERE
+		<#list pkColumns as column>
+		${column.sqlName} =
+		<@el1 column.columnNameFirstLower/> <#sep> AND
+		</#list>
+	</select>
+
+	<!-- 查询所有的ID -->
+	<select id="findAllIds" resultType="${idJavaType}">
+		SELECT ${idColumn.sqlName}
+		FROM ${sqlName}
+	</select>
+
+	<!-- 按Id删除 -->
+	<delete id="delete" parameterType="${idJavaType}">
+		DELETE FROM ${sqlName} WHERE
+		<#list pkColumns as column>
+		${column.sqlName} = <@el1
+		column.columnNameFirstLower/> <#sep> AND
+		</#list>
+	</delete>
+	<!-- 插入 -->
+	<insert id="insert">
+		INSERT INTO ${sqlName} (
+		<include refid="Base_Column_List" />
+		) VALUES (
+		<#list columns as column>
+		<#if column.pk>
+		null,<!--主键自动生成 -->
+		<#else>
+		<@el1 column.columnNameFirstLower/><#sep>,
+		</#if>
+		</#list>
+		)
+	</insert>
+
+	<select id="findLastInsertedId" resultType="${idJavaType}">
+		SELECT
+		LAST_INSERT_ID()
+	</select>
+
+	<select id="countAll" resultType="java.lang.Integer">
+		SELECT
+		count(${idColumn.sqlName}) FROM ${sqlName}
+	</select>
+
+	<select id="findAll" resultMap="rm">
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM ${sqlName}
+	</select>
+
+	<!-- 更新 -->
+	<update id="updateSelective" parameterType="${model}">
+		UPDATE ${sqlName}
+		<set>
+			<!-- update_time=now(), -->
+			<#list notPkColumns as column>
+			<#if
+			column.columnNameFirstLower!='createTime'>
+			<if test="${column.columnNameFirstLower}!=null">
+				${column.sqlName} = <@el1 column.columnNameFirstLower/>,
+			</if>
+			</#if>
+			</#list>
+		</set>
+		WHERE
+		<#list pkColumns as column>
+		${column.sqlName} = <@el1
+		column.columnNameFirstLower/><#sep> AND
+		</#list>
+	</update>
+
+	<update id="update" parameterType="${model}">
+		UPDATE ${sqlName} SET
+		<#list
+		notPkColumns as column>
+		<#if column.columnNameFirstLower!='createTime'>
+		${column.sqlName} = <@el1 column.columnNameFirstLower/><#sep>,
+		</#if>
+		</#list>
+		WHERE
+		<#list pkColumns as column>
+		${column.sqlName} = <@el1
+		column.columnNameFirstLower/> <#sep> AND
+		</#list>
+	</update>
+
+	</#if>
+
+	<select id="findPageBreakByCondition" resultMap="rm"
+		parameterType="map">
+		SELECT
+		<include refid="Base_Column_List" />
+		from ${sqlName}
+
+		<trim prefix="WHERE" prefixOverrides="AND|OR">
+		<if test="queryWhere!=null">
+			<@el2 'queryWhere'/>	 
+			</if>
+			<if test="createTime1 != null">
+				AND create_time &gt;= unix_timestamp(<@el1
+				'createTime1'/>)
+			</if>
+			<if test="createTime2 != null">
+				AND create_time &lt;= unix_timestamp(<@el1
+				'createTime2'/>)
+			</if>
+			<#if pkColumns??>
+			<#list pkColumns as column>
+			<#if
+			column.columnNameFirstLower!='createTime'>
+				<#if
+			column.jdbcSqlTypeName=='TINYINT' || column.jdbcSqlTypeName=='INT'   || column.jdbcSqlTypeName=='INTEGER' >
+			<if test="${column.columnNameFirstLower}!=null  and ${column.columnNameFirstLower}!=-1">
+			  <#else>
+			  <if test="${column.columnNameFirstLower}!=null and ${column.columnNameFirstLower}!=''  ">
+			</#if>
+				AND ${sqlName}.${column.sqlName} = <@el1
+				column.columnNameFirstLower/>
+			</if></#if>
+			</#list>
+			</#if>
+			<#list notPkColumns as column>
+			<#if
+			column.columnNameFirstLower!='createTime'>
+				<#if
+			column.jdbcSqlTypeName=='TINYINT' || column.jdbcSqlTypeName=='INT'   || column.jdbcSqlTypeName=='INTEGER' >
+				<if test="${column.columnNameFirstLower}!=null  and ${column.columnNameFirstLower}!=-1">
+			  <#else>
+			  <if test="${column.columnNameFirstLower}!=null and ${column.columnNameFirstLower}!=''  ">
+			</#if>
+				AND ${sqlName}.${column.sqlName} = <@el1
+				column.columnNameFirstLower/>
+			</if>
+			</#if>
+			</#list>
+			<!-- <if test="isDel != null"> AND is_del = <@el1 'isDel'/> </if> -->
+			<!--<if test="title != null"> AND title LIKE "%<@el2 'title'/>%" </if> 
+				<if test="state != null and state!=&quot;-1&quot;"> AND state = <@el1 'state'/> 
+				</if> -->
+		</trim>
+
+		<choose>
+			<when test="orderField !=null and orderField !=''">
+				ORDER BY <@el2 'orderField'/>
+				<if test="orderDirection != null and orderDirection != ''"><@el2 'orderDirection'/></if>
+			</when>
+			<#if pkColumns??>
+			<otherwise>
+				order by ${pkColumn} DESC
+			</otherwise>
+		</#if>
+		</choose>
+
+	</select>
+	<select id="findNumberByCondition" resultType="java.lang.Integer"
+		parameterType="map">
+		select count(0) as c from ${sqlName}
+
+		<trim prefix="WHERE" prefixOverrides="AND|OR">
+		<if test="queryWhere!=null">
+					<@el2 'queryWhere'/>	 
+			</if>
+			<if test="createTime1 != null">
+				AND create_time &gt;= unix_timestamp(<@el1
+				'createTime1'/>)
+			</if>
+			<if test="createTime2 != null">
+				AND create_time &lt;= unix_timestamp(<@el1
+				'createTime2'/>)
+			</if>
+			<#if pkColumns??>
+			<#list pkColumns as column>
+			<#if
+			column.columnNameFirstLower!='createTime'>
+				<#if
+			column.jdbcSqlTypeName=='TINYINT' || column.jdbcSqlTypeName=='INT'   || column.jdbcSqlTypeName=='INTEGER' >
+				<if test="${column.columnNameFirstLower}!=null  and ${column.columnNameFirstLower}!=-1">
+			  <#else>
+			  <if test="${column.columnNameFirstLower}!=null and ${column.columnNameFirstLower}!=''  ">
+			</#if>
+				AND ${sqlName}.${column.sqlName} = <@el1
+				column.columnNameFirstLower/>
+			</if>
+			</#if>
+			</#list>
+			</#if>
+			<#list notPkColumns as column>
+			<#if
+			column.columnNameFirstLower!='createTime'>
+				<#if
+			column.jdbcSqlTypeName=='TINYINT' || column.jdbcSqlTypeName=='INT'   || column.jdbcSqlTypeName=='INTEGER' >
+			<if test="${column.columnNameFirstLower}!=null  and ${column.columnNameFirstLower}!=-1">
+			  <#else>
+			  <if test="${column.columnNameFirstLower}!=null and ${column.columnNameFirstLower}!=''  ">
+			</#if>
+				AND ${sqlName}.${column.sqlName} = <@el1
+				column.columnNameFirstLower/>
+			</if>
+			</#if>
+			</#list>
+			<!-- <if test="isDel != null"> AND is_del = <@el1 'isDel'/> </if> -->
+			<!--<if test="title != null"> AND title LIKE "%<@el2 'title'/>%" </if> 
+				<if test="state != null and state!=&quot;-1&quot;"> AND state = <@el1 'state'/> 
+				</if> -->
+		</trim>
+
+	</select>
+
+</mapper>
+

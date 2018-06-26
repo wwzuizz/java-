@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
+    <wb-module deploy-name="dwz_code_generator-2014.3.23">
+        <wb-resource deploy-path="/" source-path="/target/m2e-jee/web-resources"/>
+        <wb-resource deploy-path="/" source-path="/WebContent" tag="defaultRootSource"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/rapid_framework"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/generator-output"/>
+        <property name="context-root" value="dwz-springmvc-mybatis"/>
+        <property name="java-output-path" value="/dwz_code_generator-2014.3.23/target/classes"/>
+    </wb-module>
+</project-modules>

@@ -1,0 +1,54 @@
+<#include '/share.include'>
+package ${validationpackage}.${moduleName}.Validator;
+
+/**
+ * created by xiaogangfan
+ * on 16/10/25.
+ */
+import ${validationpackage}.${moduleName}.annotation.${className}ParameterNotExistAnnotation;
+import ${validationpackage}.${moduleName}.enums.${className}Enum;
+import org.springframework.beans.factory.annotation.Autowired;
+import net.sf.json.JSONObject;
+import ${modepackage}.${moduleName}.condition.${className}Condition;
+import ${apppackage}.service.${moduleName}.${className}Service;
+import javax.validation.ConstraintValidator;
+import javax.validation.ConstraintValidatorContext;
+
+public class ${className}NotExistValidator implements ConstraintValidator<${className}ParameterNotExistAnnotation, String> {
+	@Autowired
+	${className}Service ${classNameLow}Service;
+
+	private ${className}Enum ${classNameLow}Enum;
+
+	public void initialize(${className}ParameterNotExistAnnotation constraintAnnotation) {
+		this.${classNameLow}Enum = constraintAnnotation.value();
+	}
+
+	public boolean isValid(String object, ConstraintValidatorContext constraintContext) {
+			if (object == null)
+				return true;
+	<#list columns as column>
+	<#if
+			column.possibleShortJavaType=='String'||column.possibleShortJavaType=='Integer'|| column.possibleShortJavaType=='Long'>
+			if (${classNameLow}Enum == ${className}Enum.${column.constantName}){ // ${column.remarks!}
+		<#if
+				column.possibleShortJavaType=='String' >
+				if(${classNameLow}Service.find${className}AppSingle(new ${className}Condition().set${column.columnName}(object))!=null){
+					return false;
+				}
+		<#elseif column.possibleShortJavaType=='Integer'>
+				if(${classNameLow}Service.find${className}AppSingle(new ${className}Condition().set${column.columnName}(Integer.valueOf(object)))!=null){
+					return false;
+				}
+		<#elseif column.possibleShortJavaType=='Long'>
+				if(${classNameLow}Service.find${className}AppSingle(new ${className}Condition().set${column.columnName}(Long.valueOf(object)))!=null){
+					return false;
+				}
+		</#if>
+			}
+	</#if>
+	</#list>
+		return true;
+	}
+
+}

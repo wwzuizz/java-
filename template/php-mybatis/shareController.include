@@ -1,0 +1,8 @@
+<#assign checkCon= "ControllerMapTag"?new()/>
+<#assign tempCon=checkCon()/>
+<#if tempCon?string != "">
+<#list tempCon?split("-") as x>
+<#assign itemCon =x?eval>   
+model.addAttribute("${itemCon['key']}Map", gson.fromJson("{<#list itemCon['name'] as itemCon><#if !itemCon_has_next>${itemCon.key}:'${itemCon.name}'<#else>${itemCon.key}:'${itemCon.name}',</#if></#list>}", Map.class));
+</#list>
+</#if>
